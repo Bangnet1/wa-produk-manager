@@ -25,7 +25,8 @@ button, .action { touch-action: manipulation; }
 @media (max-width: 640px) {
   body { font-size: 14px; }
   .business-suite { border-radius: 18px; margin-bottom: 18px; }
-  body { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }\n  .business-tabs { position: fixed; left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); top: auto; z-index: 1000; width: auto; max-width: 560px; margin: 0 auto; padding: 8px 10px; border: 1px solid rgba(226,232,240,.95); border-radius: 24px; background: rgba(255,255,255,.96); backdrop-filter: blur(18px); box-shadow: 0 8px 28px rgba(15,23,42,.18); }
+  body { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+  .business-tabs { position: fixed; left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); top: auto; z-index: 1000; width: auto; max-width: 560px; margin: 0 auto; padding: 8px 10px; border: 1px solid rgba(226,232,240,.95); border-radius: 24px; background: rgba(255,255,255,.96); backdrop-filter: blur(18px); box-shadow: 0 8px 28px rgba(15,23,42,.18); }
   .business-tabs-inner { display: flex; align-items: center; justify-content: space-around; gap: 4px; }
   .business-tab-button { position: relative; display: flex; flex: 1 1 0; align-items: center; justify-content: center; min-width: 0; min-height: 48px; padding: 10px 4px; border: 0; border-radius: 16px; background: transparent; color: #64748b; transition: color .18s ease, background .18s ease, transform .18s ease; }
   .business-tab-button.is-active { color: #0f766e; background: #ccfbf1; transform: translateY(-2px); }
@@ -53,3 +54,31 @@ button, .action { touch-action: manipulation; }
   .dashboard-actions button { min-height: 46px; padding: 10px 8px; font-size: 12px; }
   .dashboard-title { font-size: 22px !important; }
 }
+
+
+/* App-wide dark mode */
+.app-shell.dark-mode { background: #0b1220 !important; color: #e2e8f0 !important; }
+.app-shell.dark-mode header,
+.app-shell.dark-mode .business-suite,
+.app-shell.dark-mode main section,
+.app-shell.dark-mode .business-content,
+.app-shell.dark-mode .business-tabs { background-color: #111c2d !important; color: #e2e8f0 !important; border-color: #29384d !important; }
+.app-shell.dark-mode [class*="bg-white"] { background-color: #111c2d !important; }
+.app-shell.dark-mode [class*="bg-slate-50"],
+.app-shell.dark-mode [class*="bg-slate-100"] { background-color: #1b293d !important; }
+.app-shell.dark-mode [class*="text-slate-900"],
+.app-shell.dark-mode [class*="text-slate-800"],
+.app-shell.dark-mode [class*="text-slate-700"] { color: #e5edf7 !important; }
+.app-shell.dark-mode [class*="text-slate-600"],
+.app-shell.dark-mode [class*="text-slate-500"],
+.app-shell.dark-mode [class*="text-slate-400"] { color: #a8b6c9 !important; }
+.app-shell.dark-mode [class*="border-slate-"] { border-color: #33445b !important; }
+.app-shell.dark-mode input,
+.app-shell.dark-mode select,
+.app-shell.dark-mode textarea,
+.app-shell.dark-mode .field { background-color: #0c1727 !important; color: #e2e8f0 !important; border-color: #3a4b62 !important; }
+.app-shell.dark-mode .business-tab-button { color: #a8b6c9; }
+.app-shell.dark-mode .business-tab-button.is-active { color: #5eead4 !important; background: #123b3b !important; }
+.app-shell.dark-mode .business-tabs { background: rgba(17,28,45,.96) !important; box-shadow: 0 8px 28px rgba(0,0,0,.45); }
+.app-shell.dark-mode table thead { background: #1b293d !important; }
+.app-shell.dark-mode tr:hover { background: #1b293d !important; }
