@@ -384,7 +384,7 @@ export default function App() {
         <p className="mt-4 text-center text-xs text-slate-400">Data tersimpan di Supabase dan dilindungi Row Level Security.</p>
         </>} />
       </main>
-      {modalOpen && <ProductModal form={form} editing={!!editing} saving={saving} onChange={updateForm} onClose={() => setModalOpen(false)} onSubmit={saveProduct}/>}
+      {modalOpen && <ProductModal form={form} catalogOptions={catalogOptions} editing={!!editing} saving={saving} onChange={updateForm} onClose={() => setModalOpen(false)} onSubmit={saveProduct}/>}
       {batchOpen && <BatchReminderModal targets={batchTargets} selected={batchSelected} toggle={toggleBatchSelection} setSelected={setBatchSelected} template={batchTemplate} setTemplate={setBatchTemplate} templates={templates} preview={batchPreview} previewProduct={previewProduct} account={paymentAccount} setAccount={setPaymentAccount} delay={batchDelay} setDelay={setBatchDelay} running={batchRunning} progress={batchProgress} logs={batchLogs} tab={batchTab} setTab={setBatchTab} onHistory={loadBatchHistory} onExecute={executeBatch} onClose={()=>setBatchOpen(false)}/>} 
       {toast && <Toast message={toast} onClose={() => setToast("")}/>}
     </div>
@@ -429,7 +429,7 @@ function Metric({icon,label,value,note,tone}:{icon:ReactNode;label:string;value:
   return <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center justify-between"><span className="text-sm font-medium text-slate-500">{label}</span><span className={`rounded-xl p-2.5 ${colors[tone]}`}>{icon}</span></div><p className="mt-4 text-3xl font-bold tracking-tight text-slate-900">{value}</p><p className="mt-1 text-xs text-slate-400">{note}</p></article>;
 }
 
-function ProductModal({form,editing,saving,onChange,onClose,onSubmit}:{form:ProductForm;editing:boolean;saving:boolean;onChange:<K extends keyof ProductForm>(key:K,value:ProductForm[K])=>void;onClose:()=>void;onSubmit:(e:FormEvent)=>void}) {
+function ProductModal({form,catalogOptions,editing,saving,onChange,onClose,onSubmit}:{form:ProductForm;catalogOptions:{name:string;description:string;cost:number;sale:number;stock:string}[];editing:boolean;saving:boolean;onChange:<K extends keyof ProductForm>(key:K,value:ProductForm[K])=>void;onClose:()=>void;onSubmit:(e:FormEvent)=>void}) {
   return <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/50 p-4 backdrop-blur-sm" onMouseDown={e => {if(e.target === e.currentTarget) onClose();}}>
     <form onSubmit={onSubmit} className="my-auto w-full max-w-2xl rounded-3xl bg-white p-5 shadow-2xl sm:p-7">
       <div className="mb-6 flex items-start justify-between"><div><p className="text-xs font-bold uppercase tracking-wider text-teal-700">{editing ? "Perbarui data" : "Produk baru"}</p><h3 className="mt-1 text-xl font-bold text-slate-900">{editing ? "Edit Produk Digital" : "Tambah Produk Digital"}</h3><p className="mt-1 text-sm text-slate-500">Lengkapi data pelanggan dan masa aktif produk.</p></div><button type="button" onClick={onClose} className="rounded-xl bg-slate-100 p-2 text-slate-500"><X size={18}/></button></div>
