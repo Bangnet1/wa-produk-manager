@@ -232,7 +232,7 @@ export default function App() {
     });
     setModalOpen(true);
   }
-  async function saveProductTemplate(template:{name:string;description:string;cost:number;sale:number}):Promise<boolean> {
+  async function saveProductTemplate(template:{id?:string;name:string;description:string;cost:number;sale:number}):Promise<boolean> {
     if(!user){notify("Sesi login tidak ditemukan. Silakan login kembali.");return false;}
     const row={...template,id:crypto.randomUUID(),category:"Streaming",stock:"Tersedia",user_id:user.id};
     const {data,error}=await supabase.from("product_catalog").upsert(row,{onConflict:"id"}).select("id,name,description,cost,sale,stock").single();
@@ -443,9 +443,9 @@ function Metric({icon,label,value,note,tone}:{icon:ReactNode;label:string;value:
   return <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center justify-between"><span className="text-sm font-medium text-slate-500">{label}</span><span className={`rounded-xl p-2.5 ${colors[tone]}`}>{icon}</span></div><p className="mt-4 text-3xl font-bold tracking-tight text-slate-900">{value}</p><p className="mt-1 text-xs text-slate-400">{note}</p></article>;
 }
 
-function ProductTemplateManager({options,onAdd,onDelete,onSelect}:{options:{id:string;name:string;description:string;cost:number;sale:number;stock:string}[];onAdd:(t:{name:string;description:string;cost:number;sale:number})=>Promise<boolean>;onDelete:(id:string)=>Promise<void>;onSelect:(item:{name:string;description:string;cost:number;sale:number})=>void}) {
- const [name,setName]=useState(""); const [description,setDescription]=useState("1 Bulan"); const [cost,setCost]=useState(""); const [sale,setSale]=useState(""); const [busy,setBusy]=useState(false);
- const submit=async()=>{if(!name.trim())return;setBusy(true);const saved=await onAdd({name:name.trim(),description:description.trim(),cost:Number(cost)||0,sale:Number(sale)||0});if(saved){setName("");setDescription("1 Bulan");setCost("");setSale("");}setBusy(false);};
+function ProductTemplateManager({options,onAdd,onDelete,onSelect}:{options:{id:string;name:string;description:string;cost:number;sale:number;stock:string}[];onAdd:(t:{id?:string;name:string;description:string;cost:number;sale:number})=>Promise<boolean>;onDelete:(id:string)=>Promise<void>;onSelect:(item:{name:string;description:string;cost:number;sale:number})=>void}) {
+ const [name,setName]=useState(""); const [description,setDescription]=useState("1 Bulan"); const [cost,setCost]=useState(""); const [sale,setSale]=useState(""); const [busy,setBusy]=useState(false); const [editingId,setEditingId]=useState<string|null>(null);
+ const submit=async()=>{if(!name.trim())return;setBusy(true);const saved=await onAdd({id:editingId||undefined,name:name.trim(),description:description.trim(),cost:Number(cost)||0,sale:Number(sale)||0});if(saved){setEditingId(null);setName("");setDescription("1 Bulan");setCost("");setSale("");}setBusy(false);};
  return <div className="sm:col-span-2 rounded-2xl border border-slate-600 bg-slate-800 p-4">
   <h4 className="font-bold text-slate-100">Template produk digital</h4><p className="mb-3 text-xs text-slate-300">Buat daftar sendiri. Pilih template untuk mengisi varian, modal, dan harga jual otomatis.</p>
   <div className="grid grid-cols-2 gap-2">
@@ -454,10 +454,10 @@ function ProductTemplateManager({options,onAdd,onDelete,onSelect}:{options:{id:s
    <input className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm" inputMode="numeric" placeholder="Harga modal" value={cost} onChange={e=>setCost(e.target.value.replace(/\D/g,""))}/>
    <input className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm" inputMode="numeric" placeholder="Harga jual" value={sale} onChange={e=>setSale(e.target.value.replace(/\D/g,""))}/>
   </div>
-  <button type="button" disabled={busy||!name.trim()} onClick={submit} className="action mt-3"><Plus size={14}/>Simpan template</button>
+  <div className="mt-3 flex gap-2"><button type="button" disabled={busy||!name.trim()} onClick={submit} className="action"><Plus size={14}/>{editingId?"Simpan perubahan":"Simpan template"}</button>{editingId&&<button type="button" className="action" onClick={()=>{setEditingId(null);setName("");setDescription("1 Bulan");setCost("");setSale("");}}>Batal edit</button>}</div>
   <div className="mt-3 space-y-2">{options.map(item=><div key={item.id} className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white p-3">
    <button type="button" className="min-w-0 flex-1 text-left" onClick={()=>onSelect(item)}><span className="block truncate text-sm font-semibold">{item.name}</span><span className="block text-xs text-slate-300">{item.description} · Modal {money(item.cost)} · Jual {money(item.sale)}</span></button>
-   <button type="button" aria-label={`Hapus template ${item.name}`} className="rounded-lg p-2 text-rose-600 hover:bg-rose-50" onClick={()=>onDelete(item.id)}><Trash2 size={16}/></button>
+   <div className="flex shrink-0 gap-1"><button type="button" aria-label={`Edit template ${item.name}`} className="rounded-lg p-2 text-teal-700 hover:bg-teal-50" onClick={()=>{setEditingId(item.id);setName(item.name);setDescription(item.description);setCost(String(item.cost));setSale(String(item.sale));}}><Pencil size={16}/></button><button type="button" aria-label={`Hapus template ${item.name}`} className="rounded-lg p-2 text-rose-600 hover:bg-rose-50" onClick={()=>onDelete(item.id)}><Trash2 size={16}/></button></div>
   </div>)}</div>
  </div>;
 }
