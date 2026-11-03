@@ -25,11 +25,11 @@ button, .action { touch-action: manipulation; }
 @media (max-width: 640px) {
   body { font-size: 14px; }
   .business-suite { border-radius: 18px; margin-bottom: 18px; }
-  .business-tabs { position: sticky; top: 64px; z-index: 20; background: rgba(255,255,255,.97); backdrop-filter: blur(12px); padding: 9px 10px; }
+  body { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }\n  .business-tabs { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 1000; width: 100%; background: rgba(255,255,255,.98); backdrop-filter: blur(14px); padding: 9px 10px calc(9px + env(safe-area-inset-bottom)); border-top: 1px solid #e2e8f0; box-shadow: 0 -8px 24px rgba(15,23,42,.10); }
   .business-tabs > div { scrollbar-width: none; scroll-snap-type: x proximity; }
   .business-tabs > div::-webkit-scrollbar { display: none; }
   .business-tabs button { min-height: 42px; padding: 10px 12px; scroll-snap-align: start; }
-  .business-content { padding: 14px 12px !important; }
+  .business-content { padding: 14px 12px 92px !important; }
   .business-content .field { font-size: 16px; min-height: 46px; padding: 11px 12px; }
   .business-content .action { min-height: 44px; padding: 10px 12px; font-size: 12px; }
   .business-content .grid { min-width: 0; }
