@@ -78,6 +78,59 @@ export default function App() {
   const [bellOpen, setBellOpen] = useState(false);
   const [alertItems, setAlertItems] = useState<Product[]>([]);
   const [alertDismissed, setAlertDismissed] = useState(false);
+  const [batchOpen, setBatchOpen] = useState(false);
+  const [batchSelected, setBatchSelected] = useState<string[]>([]);
+  const [batchTemplate, setBatchTemplate] = useState("friendly");
+  const [batchDelay, setBatchDelay] = useState(4);
+  const [paymentAccount, setPaymentAccount] = useState("");
+  const [batchRunning, setBatchRunning] = useState(false);
+  const [batchProgress, setBatchProgress] = useState(0);
+  const [batchLogs, setBatchLogs] = useState<{id:string;name:string;phone:string;status:"SUCCESS"|"FAILED";detail:string;time:string}[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [batchTab, setBatchTab] = useState<"queue"|"history">("queue");
+  const batchTargets = useMemo(() => products.filter(p => { const d=dayDiff(p.expiry_date); return d>=0 && d<=3; }).sort((a,b)=>a.expiry_date.localeCompare(b.expiry_date)), [products]);
+  const templates: Record<string,string> = {
+    friendly: "Halo {{nama}}! 😊\nMasa aktif {{produk}} Anda akan berakhir {{sisa_hari}} ({{tanggal_jatuh_tempo}}). Jika ingin memperpanjang, cukup balas pesan ini ya. Harga perpanjangan: {{harga_perpanjangan}}.\n\nPembayaran: {{rekening_pembayaran}}\nTerima kasih!",
+    formal: "Yth. {{nama}}, kami informasikan masa aktif {{produk}} akan berakhir {{sisa_hari}}, pada {{tanggal_jatuh_tempo}}. Perpanjangan tersedia dengan biaya {{harga_perpanjangan}}.\nInformasi pembayaran: {{rekening_pembayaran}}\nTerima kasih.",
+    promo: "Hai {{nama}}! Masa aktif {{produk}} hampir selesai. Yuk perpanjang sekarang agar tetap bisa digunakan. Jatuh tempo: {{tanggal_jatuh_tempo}} ({{sisa_hari}}). Harga perpanjangan {{harga_perpanjangan}}.\nPembayaran: {{rekening_pembayaran}}"
+  };
+  const interpolate = (p:Product, template:string) => {
+    const d=dayDiff(p.expiry_date);
+    const remaining=d===0?"hari ini":d===1?"1 hari lagi":`${d} hari lagi`;
+    return template.replace(/{{nama}}/g,p.customer_name).replace(/{{produk}}/g,`${p.product_name}${p.variant ? " ("+p.variant+")" : ""}`).replace(/{{sisa_hari}}/g,remaining).replace(/{{tanggal_jatuh_tempo}}/g,formatDate(p.expiry_date)).replace(/{{harga_perpanjangan}}/g,money(p.selling_price)).replace(/{{rekening_pembayaran}}/g,paymentAccount.trim() || "Hubungi admin untuk informasi pembayaran");
+  };
+  const previewProduct = batchTargets.find(p=>batchSelected.includes(p.id)) ?? batchTargets[0];
+  const batchPreview = previewProduct ? interpolate(previewProduct,templates[batchTemplate]) : "Pilih pelanggan untuk melihat pratinjau pesan.";
+  const openBatch = () => { setBatchSelected(batchTargets.map(p=>p.id)); setBatchTab("queue"); setBatchOpen(true); };
+  const toggleBatchSelection = (id:string) => setBatchSelected(prev=>prev.includes(id)?prev.filter(x=>x!==id):[...prev,id]);
+  const loadBatchHistory = async () => {
+    const {data,error}=await supabase.from("broadcast_logs").select("*").order("created_at",{ascending:false}).limit(100);
+    if(error){notify("Riwayat broadcast belum tersedia. Jalankan migration batch reminder.");return;}
+    setBatchLogs((data??[]).map((x:any)=>({id:x.id,name:x.customer_name,phone:x.phone,status:x.status,detail:x.detail ?? "",time:new Date(x.created_at).toLocaleString("id-ID")})));
+  };
+  const executeBatch = async () => {
+    const selected=batchTargets.filter(p=>batchSelected.includes(p.id));
+    if(!selected.length || batchRunning)return;
+    if(!window.confirm(`Siapkan ${selected.length} tab WhatsApp dan proses antrean dengan jeda ${batchDelay} detik per nomor? Pesan belum terkirim sampai Anda menekan tombol Kirim di WhatsApp.`))return;
+    // Pre-open tabs synchronously from the user gesture to reduce popup blocking.
+    const tabs=selected.map(()=>window.open("about:blank","_blank"));
+    setBatchRunning(true);setBatchProgress(0);
+    const runLogs:{id:string;name:string;phone:string;status:"SUCCESS"|"FAILED";detail:string;time:string}[]=[];
+    for(let i=0;i<selected.length;i++){
+      const p=selected[i]; const tab=tabs[i]; let status:"SUCCESS"|"FAILED"= "SUCCESS"; let detail="Tab WhatsApp dibuka; pesan menunggu konfirmasi Kirim.";
+      try {
+        if(!tab || tab.closed) throw new Error("Tab diblokir browser. Izinkan pop-up untuk situs ini.");
+        tab.location.href=`https://wa.me/${normalizePhone(p.phone)}?text=${encodeURIComponent(interpolate(p,templates[batchTemplate]))}`;
+      } catch(e){status="FAILED";detail=e instanceof Error?e.message:"Gagal membuka tab";}
+      const log={id:p.id,name:p.customer_name,phone:p.phone,status,detail,time:new Date().toLocaleString("id-ID")};
+      runLogs.push(log);setBatchLogs([...runLogs]);setBatchProgress(Math.round(((i+1)/selected.length)*100));
+      await supabase.from("broadcast_logs").insert({user_id:user?.id,product_id:p.id,customer_name:p.customer_name,phone:p.phone,product_name:p.product_name,status,detail,template_key:batchTemplate});
+      if(i<selected.length-1) await new Promise(resolve=>window.setTimeout(resolve,batchDelay*1000));
+    }
+    setBatchRunning(false);
+    notify(`Antrean selesai: ${runLogs.filter(x=>x.status==="SUCCESS").length} tab dibuka, ${runLogs.filter(x=>x.status==="FAILED").length} gagal. Pesan perlu dikirim manual di WhatsApp.`);
+  };
+
 
   const notify = useCallback((message: string) => {
     setToast(message);
@@ -267,7 +320,7 @@ export default function App() {
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div><p className="text-xs font-bold uppercase tracking-[.2em] text-teal-700">Dashboard</p><h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Manajemen Produk Digital</h2><p className="mt-1 text-sm text-slate-500">Pantau langganan pelanggan dan tindak lanjuti sebelum masa aktif berakhir.</p></div>
-          <button onClick={openCreate} className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-teal-700/15 hover:bg-teal-800"><Plus size={17}/> Tambah Produk</button>
+          <div className="flex flex-wrap gap-2"><button onClick={openBatch} className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800 hover:bg-emerald-100"><MessageCircle size={17}/> Pengingat Masal ({batchTargets.length})</button><button onClick={openCreate} className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-teal-700/15 hover:bg-teal-800"><Plus size={17}/> Tambah Produk</button></div>
         </div>
 
         {reminders.length > 0 && !alertDismissed && <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900"><CircleAlert className="mt-0.5 shrink-0" size={20}/><div className="min-w-0 flex-1"><p className="font-bold">{reminders.length} produk perlu ditindaklanjuti</p><p className="mt-1 text-sm text-amber-800">Ada produk dengan jatuh tempo H-3 sampai hari ini. Periksa daftar dan kirim pengingat WhatsApp.</p></div><button onClick={() => setAlertDismissed(true)} aria-label="Tutup"><X size={18}/></button></div>}
@@ -319,9 +372,43 @@ export default function App() {
         <p className="mt-4 text-center text-xs text-slate-400">Data tersimpan di Supabase dan dilindungi Row Level Security.</p>
       </main>
       {modalOpen && <ProductModal form={form} editing={!!editing} saving={saving} onChange={updateForm} onClose={() => setModalOpen(false)} onSubmit={saveProduct}/>}
+      {batchOpen && <BatchReminderModal targets={batchTargets} selected={batchSelected} toggle={toggleBatchSelection} setSelected={setBatchSelected} template={batchTemplate} setTemplate={setBatchTemplate} templates={templates} preview={batchPreview} previewProduct={previewProduct} account={paymentAccount} setAccount={setPaymentAccount} delay={batchDelay} setDelay={setBatchDelay} running={batchRunning} progress={batchProgress} logs={batchLogs} tab={batchTab} setTab={setBatchTab} onHistory={loadBatchHistory} onExecute={executeBatch} onClose={()=>setBatchOpen(false)}/>} 
       {toast && <Toast message={toast} onClose={() => setToast("")}/>}
     </div>
   );
+}
+
+
+function BatchReminderModal({targets,selected,toggle,setSelected,template,setTemplate,templates,preview,previewProduct,account,setAccount,delay,setDelay,running,progress,logs,tab,setTab,onHistory,onExecute,onClose}:any) {
+  const [phase,setPhase]=useState("H-3");
+  const filtered=targets.filter((p:Product)=>{const d=dayDiff(p.expiry_date);return phase==="ALL"?(d>=0&&d<=3):d===Number(phase.slice(2));});
+  const allChecked=filtered.length>0&&filtered.every((p:Product)=>selected.includes(p.id));
+  const count=selected.length;
+  return <div className="fixed inset-0 z-[55] flex items-center justify-center overflow-y-auto bg-slate-950/60 p-3 backdrop-blur-sm">
+    <section className="my-auto flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
+      <header className="flex items-start justify-between border-b border-slate-100 p-5 sm:p-6"><div><p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Batch Expiry Reminder</p><h3 className="mt-1 text-xl font-bold text-slate-900 sm:text-2xl">Pengiriman Pengingat Masal</h3><p className="mt-1 text-sm text-slate-500">Pilih pelanggan, tinjau pesan, lalu proses antrean WhatsApp.</p></div><button onClick={onClose} disabled={running} className="rounded-xl bg-slate-100 p-2"><X size={18}/></button></header>
+      <div className="flex gap-2 border-b border-slate-100 px-5 pt-3"><button onClick={()=>setTab("queue")} className={`border-b-2 px-3 py-2 text-sm font-semibold ${tab==="queue"?"border-teal-600 text-teal-700":"border-transparent text-slate-500"}`}>Antrean pengingat</button><button onClick={()=>{setTab("history");onHistory();}} className={`border-b-2 px-3 py-2 text-sm font-semibold ${tab==="history"?"border-teal-600 text-teal-700":"border-transparent text-slate-500"}`}>Riwayat broadcast</button></div>
+      {tab==="queue"?<div className="grid min-h-0 flex-1 gap-0 overflow-y-auto lg:grid-cols-[1.05fr_.95fr]">
+        <div className="border-b border-slate-100 p-5 lg:border-b-0 lg:border-r">
+          <div className="mb-3 flex items-center justify-between"><b className="text-sm text-slate-800">Pelanggan terdeteksi ({targets.length})</b><span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-700">{count} dipilih</span></div>
+          <div className="mb-3 flex flex-wrap gap-2">{["ALL","H-3","H-2","H-1","H-0"].map((x:string)=><button key={x} onClick={()=>setPhase(x)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${phase===x?"bg-slate-800 text-white":"bg-slate-100 text-slate-600"}`}>{x==="ALL"?"Semua":x}</button>)}</div>
+          <label className="mb-2 flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5 text-sm font-semibold"><input type="checkbox" checked={allChecked} onChange={e=>setSelected(e.target.checked?[...new Set([...selected,...filtered.map((p:Product)=>p.id)])]:selected.filter((id:string)=>!filtered.some((p:Product)=>p.id===id)))} /> Pilih semua di filter ini</label>
+          <div className="max-h-[340px] space-y-2 overflow-y-auto pr-1">{filtered.length===0?<p className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400">Tidak ada pelanggan pada fase ini.</p>:filtered.map((p:Product)=>{const d=dayDiff(p.expiry_date);return <label key={p.id} className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3 hover:border-teal-300"><input type="checkbox" className="mt-1" checked={selected.includes(p.id)} onChange={()=>toggle(p.id)}/><span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold text-slate-800">{p.customer_name} · {p.product_name}</span><span className="mt-1 block text-xs text-slate-500">{p.phone} · {formatDate(p.expiry_date)}</span></span><span className="shrink-0 rounded-full bg-amber-50 px-2 py-1 text-[11px] font-bold text-amber-700">H-{d}</span></label>})}</div>
+          <p className="mt-3 text-xs text-slate-400">Pemindaian memakai data produk terbaru yang telah dimuat di dashboard.</p>
+        </div>
+        <div className="space-y-4 p-5">
+          <div><label className="mb-2 block text-sm font-bold text-slate-800">Template pesan</label><select value={template} onChange={e=>setTemplate(e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"><option value="friendly">Ramah & personal</option><option value="formal">Formal</option><option value="promo">Ajakan perpanjangan</option></select></div>
+          <div><label className="mb-2 block text-sm font-bold text-slate-800">Rekening / instruksi pembayaran</label><input value={account} onChange={e=>setAccount(e.target.value)} placeholder="BCA 123... a.n. Nama / QRIS..." className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/></div>
+          <div><div className="mb-2 flex items-center justify-between"><b className="text-sm text-slate-800">Preview pesan</b><span className="text-xs text-slate-400">{previewProduct?.customer_name??"Belum dipilih"}</span></div><pre className="max-h-48 overflow-y-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-700">{preview}</pre><div className="mt-2 flex flex-wrap gap-1">{["{{nama}}","{{produk}}","{{sisa_hari}}","{{tanggal_jatuh_tempo}}","{{harga_perpanjangan}}","{{rekening_pembayaran}}"].map(x=><code key={x} className="rounded bg-slate-100 px-1.5 py-1 text-[10px] text-slate-500">{x}</code>)}</div></div>
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3"><div className="flex items-center gap-2 text-sm font-bold text-amber-900"><ShieldCheck size={17}/> Jeda anti-spam</div><p className="mt-1 text-xs text-amber-800">Atur jeda antar pembukaan chat. Default 4 detik (rentang rekomendasi 3–5 detik).</p><div className="mt-3 flex items-center gap-3"><input type="range" min="3" max="5" value={delay} onChange={e=>setDelay(Number(e.target.value))} className="flex-1"/><b className="w-14 rounded-lg bg-white px-2 py-1.5 text-center text-sm text-amber-900">{delay} dtk</b></div></div>
+          {running&&<div><div className="mb-2 flex justify-between text-xs font-semibold text-slate-600"><span>Memproses antrean...</span><span>{Math.round(progress)}%</span></div><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-teal-600 transition-all" style={{width:progress+"%"}}/></div></div>}
+          <button disabled={running||count===0} onClick={onExecute} className="w-full rounded-xl bg-emerald-700 px-4 py-3.5 text-sm font-bold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"><MessageCircle className="mr-2 inline" size={17}/>{running?"Memproses antrean...":`Mulai antrean WhatsApp (${count})`}</button>
+          <p className="text-[11px] leading-5 text-slate-400">Penting: browser membuka chat WhatsApp satu per satu. Status sukses berarti tab berhasil dibuka, bukan pesan terkirim. Anda tetap harus menekan tombol Kirim di WhatsApp. Pastikan pelanggan menyetujui pesan pengingat.</p>
+        </div>
+      </div>:<div className="min-h-0 flex-1 overflow-y-auto p-5"><div className="mb-3 flex items-center justify-between"><b className="text-sm">Riwayat aktivitas broadcast</b><span className="text-xs text-slate-400">100 aktivitas terakhir</span></div>{logs.length===0?<p className="rounded-xl bg-slate-50 p-8 text-center text-sm text-slate-500">Belum ada riwayat broadcast.</p>:<div className="space-y-2">{logs.map((l:any,i:number)=><div key={l.id+"-"+i} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 p-3"><div><p className="text-sm font-semibold">{l.name} · {l.phone}</p><p className="mt-1 text-xs text-slate-500">{l.detail} · {l.time}</p></div><span className={`rounded-full px-2.5 py-1 text-xs font-bold ${l.status==="SUCCESS"?"bg-emerald-50 text-emerald-700":"bg-rose-50 text-rose-700"}`}>{l.status==="SUCCESS"?"Tab dibuka":"Gagal"}</span></div>)}</div>}</div>}
+      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-slate-50 px-5 py-3"><span className="text-xs text-slate-500">Terpilih: {count} pelanggan</span><button onClick={onClose} disabled={running} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600">Tutup</button></footer>
+    </section>
+  </div>;
 }
 
 function Metric({icon,label,value,note,tone}:{icon:ReactNode;label:string;value:number;note:string;tone:"teal"|"amber"|"rose"}) {
