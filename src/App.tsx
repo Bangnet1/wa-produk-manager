@@ -22,7 +22,6 @@ type Product = {
 type ProductForm = Omit<Product, "id" | "user_id" | "created_at">;
 type FilterKey = "ALL" | ProductStatus;
 
-const PRESETS = ["Netflix", "Spotify", "Canva", "YouTube Premium", "Disney+", "Viu", "Prime Video", "iCloud+", "Google One", "CapCut", "ChatGPT Plus", "Microsoft 365", "Lainnya"];
 const money = (value: number | null) => value == null ? "—" : new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(value);
 const todayISO = () => {
   const d = new Date();
