@@ -295,12 +295,12 @@ export default function App() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800">
+    <div className="app-shell min-h-screen bg-slate-50 text-slate-800">
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-700 text-lg font-black text-white">W</div>
-            <div><h1 className="font-bold text-slate-900">WA & Produk Manager</h1><p className="text-xs text-slate-500">Digital product expiry tracker</p></div>
+            <div><h1 className="font-bold text-slate-900">WA & Produk Manager</h1><p className="brand-subtitle text-xs text-slate-500">Digital product expiry tracker</p></div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="relative">
@@ -318,11 +318,11 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="app-main mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <BusinessSuite userId={user.id} products={products} notify={notify} />
         <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div><p className="text-xs font-bold uppercase tracking-[.2em] text-teal-700">Dashboard</p><h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Manajemen Produk Digital</h2><p className="mt-1 text-sm text-slate-500">Pantau langganan pelanggan dan tindak lanjuti sebelum masa aktif berakhir.</p></div>
-          <div className="flex flex-wrap gap-2"><button onClick={openBatch} className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800 hover:bg-emerald-100"><MessageCircle size={17}/> Pengingat Masal ({batchTargets.length})</button><button onClick={openCreate} className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-teal-700/15 hover:bg-teal-800"><Plus size={17}/> Tambah Produk</button></div>
+          <div><p className="text-xs font-bold uppercase tracking-[.2em] text-teal-700">Dashboard</p><h2 className="dashboard-title mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Manajemen Produk Digital</h2><p className="mt-1 text-sm text-slate-500">Pantau langganan pelanggan dan tindak lanjuti sebelum masa aktif berakhir.</p></div>
+          <div className="dashboard-actions flex flex-wrap gap-2"><button onClick={openBatch} className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800 hover:bg-emerald-100"><MessageCircle size={17}/> Pengingat Masal ({batchTargets.length})</button><button onClick={openCreate} className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-teal-700/15 hover:bg-teal-800"><Plus size={17}/> Tambah Produk</button></div>
         </div>
 
         {reminders.length > 0 && !alertDismissed && <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900"><CircleAlert className="mt-0.5 shrink-0" size={20}/><div className="min-w-0 flex-1"><p className="font-bold">{reminders.length} produk perlu ditindaklanjuti</p><p className="mt-1 text-sm text-amber-800">Ada produk dengan jatuh tempo H-3 sampai hari ini. Periksa daftar dan kirim pengingat WhatsApp.</p></div><button onClick={() => setAlertDismissed(true)} aria-label="Tutup"><X size={18}/></button></div>}
