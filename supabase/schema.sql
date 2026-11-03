@@ -1,4 +1,3 @@
-
 -- RLS: setiap pengguna hanya dapat mengakses datanya sendiri.
 
 -- Kebijakan khusus tabel profiles karena menggunakan kolom id.
