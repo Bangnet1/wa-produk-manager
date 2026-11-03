@@ -8,7 +8,8 @@ const money=(v:number)=>new Intl.NumberFormat("id-ID",{style:"currency",currency
 type Row={id:string;invoice_number:string;sale_date:string;status:string;total:number;customer_id:string|null};
 type Person={id:string;name:string;phone:string|null};
 type Template={id:string;name:string;variant:string|null;cost_price:number;sale_price:number};
-type Payment={sale_id:string;amount:number};\n
+type Payment={sale_id:string;amount:number};
+
 export function Transactions({userId,notify}:{userId:string;notify:(s:string)=>void}){
  const [rows,setRows]=useState<Row[]>([]),[people,setPeople]=useState<Person[]>([]),[templates,setTemplates]=useState<Template[]>([]),[payments,setPayments]=useState<Payment[]>([]);
  const [loading,setLoading]=useState(true),[error,setError]=useState(""),[query,setQuery]=useState(""),[open,setOpen]=useState(false),[busy,setBusy]=useState(false);
