@@ -324,7 +324,7 @@ export default function App() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <img src={bangnetLogo} alt="Bangnet" className="h-12 w-12 rounded-xl object-contain bg-white"/>
-            <div><h1 className="font-bold text-slate-900">WA & Produk Manager</h1><p className="brand-subtitle text-xs text-slate-500">Digital product expiry tracker</p></div>
+            <div><h1 className="font-bold text-slate-900">Bangnet Manager</h1><p className="brand-subtitle text-xs text-slate-500">All-in-One Digital Business Workspace</p></div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             <button type="button" onClick={() => setDarkMode(v => !v)} className="rounded-xl border border-slate-200 p-2.5 text-slate-600 hover:bg-slate-50" aria-label={darkMode ? "Aktifkan mode terang" : "Aktifkan mode gelap"} title={darkMode ? "Mode terang" : "Mode gelap"}>{darkMode ? <Sun size={19}/> : <Moon size={19}/>}</button>
@@ -337,7 +337,7 @@ export default function App() {
                 {reminders.length === 0 ? <p className="p-4 text-center text-sm text-slate-500">Tidak ada produk yang jatuh tempo dalam 3 hari.</p> : reminders.map(p => <div key={p.id} className="border-t border-slate-100 py-3"><div className="flex justify-between gap-2 text-sm font-semibold"><span>{p.product_name}</span><span className="text-amber-700">H-{dayDiff(p.expiry_date)}</span></div><p className="mt-1 text-xs text-slate-500">{p.customer_name} · {formatDate(p.expiry_date)}</p><a href={waUrl(p)} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700"><MessageCircle size={13}/> Hubungi pelanggan</a></div>)}
               </div>}
             </div>
-            <a href="/wa-produk-manager/legacy/" className="hidden rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 md:inline-flex">Fitur lama</a><div className="hidden max-w-48 text-right sm:block"><p className="truncate text-xs font-semibold text-slate-700">{user.email}</p><p className="text-[11px] text-slate-400">Akun aktif</p></div>
+            <div className="hidden max-w-48 text-right sm:block"><p className="truncate text-xs font-semibold text-slate-700">{user.email}</p><p className="text-[11px] text-slate-400">Akun aktif</p></div>
             <button onClick={signOut} className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"><LogOut size={16}/><span className="hidden sm:inline">Keluar</span></button>
           </div>
         </div>
@@ -345,7 +345,7 @@ export default function App() {
 
       <main className="app-main mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <BusinessSuite userId={user.id} products={products} notify={notify} dashboardContent={<>        <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div><p className="text-xs font-bold uppercase tracking-[.2em] text-teal-700">Dashboard</p><h2 className="dashboard-title mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Manajemen Produk Digital</h2><p className="mt-1 text-sm text-slate-500">Pantau langganan pelanggan dan tindak lanjuti sebelum masa aktif berakhir.</p></div>
+          <div><p className="text-xs font-bold uppercase tracking-[.2em] text-teal-700">Dashboard</p><h2 className="dashboard-title mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Ringkasan Bisnis</h2><p className="mt-1 text-sm text-slate-500">Pantau operasional produk digital, pelanggan, transaksi, dan aktivitas bisnis dari satu tempat.</p></div>
           <div className="dashboard-actions flex flex-wrap gap-2"><button onClick={openBatch} className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800 hover:bg-emerald-100"><MessageCircle size={17}/> Pengingat Masal ({batchTargets.length})</button><button onClick={openCreate} className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-teal-700/15 hover:bg-teal-800"><Plus size={17}/> Tambah Produk</button></div>
         </div>
 
