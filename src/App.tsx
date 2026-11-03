@@ -159,10 +159,10 @@ export default function App() {
   useEffect(() => {
     if (user) {
       loadProducts();
-      supabase.from("product_catalog").select("id,name,description,cost,sale,stock").order("name")
+      supabase.from("product_templates").select("id,name,variant,cost_price,sale_price,stock_status,is_active").eq("is_active",true).order("name")
         .then(({data,error}) => {
           if (error) { console.error("Gagal memuat katalog produk:", error.message); return; }
-          setCatalogOptions((data ?? []) as {id:string;name:string;description:string;cost:number;sale:number;stock:string}[]);
+          setCatalogOptions((data ?? []).map((x:any)=>({id:x.id,name:x.name,description:x.variant||"",cost:Number(x.cost_price)||0,sale:Number(x.sale_price)||0,stock:x.stock_status==="out_of_stock"?"Habis":"Tersedia"})));
         });
     } else { setProducts([]); setCatalogOptions([]); setLoading(false); }
   }, [user, loadProducts]);
@@ -234,16 +234,17 @@ export default function App() {
   }
   async function saveProductTemplate(template:{id?:string;name:string;description:string;cost:number;sale:number}):Promise<boolean> {
     if(!user){notify("Sesi login tidak ditemukan. Silakan login kembali.");return false;}
-    const row={...template,id:crypto.randomUUID(),category:"Streaming",stock:"Tersedia",user_id:user.id};
-    const {data,error}=await supabase.from("product_catalog").upsert(row,{onConflict:"id"}).select("id,name,description,cost,sale,stock").single();
+    const row={name:template.name.trim(),category:"Streaming",description:template.description,variant:template.description,cost_price:template.cost,sale_price:template.sale,stock_status:"available",is_active:true,user_id:user.id};
+    const query=template.id ? supabase.from("product_templates").update(row).eq("id",template.id).eq("user_id",user.id) : supabase.from("product_templates").insert(row);
+    const {data,error}=await query.select("id,name,variant,cost_price,sale_price,stock_status").single();
     if(error){notify("Template gagal disimpan. "+error.message+(error.details?" Detail: "+error.details:"")+(error.hint?" Petunjuk: "+error.hint:""));return false;}
-    setCatalogOptions(prev=>[...prev.filter(x=>x.id!==data.id),data as {id:string;name:string;description:string;cost:number;sale:number;stock:string}]);
+    setCatalogOptions(prev=>[...prev.filter(x=>x.id!==data.id),{id:data.id,name:data.name,description:data.variant||"",cost:Number(data.cost_price)||0,sale:Number(data.sale_price)||0,stock:data.stock_status==="out_of_stock"?"Habis":"Tersedia"}]);
     notify("Template produk berhasil disimpan.");
     return true;
   }
   async function deleteProductTemplate(id:string) {
     if(!user||!window.confirm("Hapus template produk ini?"))return;
-    const {error}=await supabase.from("product_catalog").delete().eq("id",id).eq("user_id",user.id);
+    const {error}=await supabase.from("product_templates").delete().eq("id",id).eq("user_id",user.id);
     if(error){notify("Gagal menghapus template: "+error.message);return;}
     setCatalogOptions(prev=>prev.filter(x=>x.id!==id));notify("Template produk dihapus.");
   }
