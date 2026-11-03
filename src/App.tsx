@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { createClient, type User } from "@supabase/supabase-js";
 import {
   Activity, Bell, CalendarClock, Check, ChevronDown, CircleAlert, Clock3,
@@ -150,7 +151,7 @@ export default function App() {
     expired: products.filter(p => statusOf(p.expiry_date) === "EXPIRED").length
   }), [products]);
 
-  async function signIn(e: React.FormEvent) {
+  async function signIn(e: FormEvent) {
     e.preventDefault(); setAuthBusy(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) notify(error.message);
@@ -178,7 +179,7 @@ export default function App() {
     });
   }
 
-  async function saveProduct(e: React.FormEvent) {
+  async function saveProduct(e: FormEvent) {
     e.preventDefault();
     if (!user) return;
     const phone = normalizePhone(form.phone);
@@ -257,7 +258,7 @@ export default function App() {
                 {reminders.length === 0 ? <p className="p-4 text-center text-sm text-slate-500">Tidak ada produk yang jatuh tempo dalam 3 hari.</p> : reminders.map(p => <div key={p.id} className="border-t border-slate-100 py-3"><div className="flex justify-between gap-2 text-sm font-semibold"><span>{p.product_name}</span><span className="text-amber-700">H-{dayDiff(p.expiry_date)}</span></div><p className="mt-1 text-xs text-slate-500">{p.customer_name} · {formatDate(p.expiry_date)}</p><a href={waUrl(p)} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700"><MessageCircle size={13}/> Hubungi pelanggan</a></div>)}
               </div>}
             </div>
-            <div className="hidden max-w-48 text-right sm:block"><p className="truncate text-xs font-semibold text-slate-700">{user.email}</p><p className="text-[11px] text-slate-400">Akun aktif</p></div>
+            <a href="/wa-produk-manager/legacy/" className="hidden rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 md:inline-flex">Fitur lama</a><div className="hidden max-w-48 text-right sm:block"><p className="truncate text-xs font-semibold text-slate-700">{user.email}</p><p className="text-[11px] text-slate-400">Akun aktif</p></div>
             <button onClick={signOut} className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"><LogOut size={16}/><span className="hidden sm:inline">Keluar</span></button>
           </div>
         </div>
@@ -323,12 +324,12 @@ export default function App() {
   );
 }
 
-function Metric({icon,label,value,note,tone}:{icon:React.ReactNode;label:string;value:number;note:string;tone:"teal"|"amber"|"rose"}) {
+function Metric({icon,label,value,note,tone}:{icon:ReactNode;label:string;value:number;note:string;tone:"teal"|"amber"|"rose"}) {
   const colors = {teal:"bg-teal-50 text-teal-700",amber:"bg-amber-50 text-amber-700",rose:"bg-rose-50 text-rose-700"};
   return <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center justify-between"><span className="text-sm font-medium text-slate-500">{label}</span><span className={`rounded-xl p-2.5 ${colors[tone]}`}>{icon}</span></div><p className="mt-4 text-3xl font-bold tracking-tight text-slate-900">{value}</p><p className="mt-1 text-xs text-slate-400">{note}</p></article>;
 }
 
-function ProductModal({form,editing,saving,onChange,onClose,onSubmit}:{form:ProductForm;editing:boolean;saving:boolean;onChange:<K extends keyof ProductForm>(key:K,value:ProductForm[K])=>void;onClose:()=>void;onSubmit:(e:React.FormEvent)=>void}) {
+function ProductModal({form,editing,saving,onChange,onClose,onSubmit}:{form:ProductForm;editing:boolean;saving:boolean;onChange:<K extends keyof ProductForm>(key:K,value:ProductForm[K])=>void;onClose:()=>void;onSubmit:(e:FormEvent)=>void}) {
   return <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/50 p-4 backdrop-blur-sm" onMouseDown={e => {if(e.target === e.currentTarget) onClose();}}>
     <form onSubmit={onSubmit} className="my-auto w-full max-w-2xl rounded-3xl bg-white p-5 shadow-2xl sm:p-7">
       <div className="mb-6 flex items-start justify-between"><div><p className="text-xs font-bold uppercase tracking-wider text-teal-700">{editing ? "Perbarui data" : "Produk baru"}</p><h3 className="mt-1 text-xl font-bold text-slate-900">{editing ? "Edit Produk Digital" : "Tambah Produk Digital"}</h3><p className="mt-1 text-sm text-slate-500">Lengkapi data pelanggan dan masa aktif produk.</p></div><button type="button" onClick={onClose} className="rounded-xl bg-slate-100 p-2 text-slate-500"><X size={18}/></button></div>
