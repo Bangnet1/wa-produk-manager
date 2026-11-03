@@ -281,7 +281,7 @@ export default function App() {
       <form onSubmit={signIn} className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/60">
         <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-600 text-xl font-black text-white">W</div>
         <p className="text-xs font-bold uppercase tracking-[.2em] text-teal-700">Workspace</p>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900">WA & Produk Manager</h1>
+        <h1 className="mt-2 text-2xl font-bold text-slate-900">Bangnet Manager</h1>
         <p className="mt-2 text-sm text-slate-500">Masuk untuk mengelola produk digital dan masa aktif pelanggan.</p>
         <label className="mt-7 block text-sm font-semibold text-slate-700">Email
           <input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" placeholder="nama@email.com" />
@@ -301,7 +301,7 @@ export default function App() {
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-700 text-lg font-black text-white">W</div>
+            <img src={bangnetLogo} alt="Bangnet" className="h-12 w-12 rounded-xl object-contain bg-white"/>
             <div><h1 className="font-bold text-slate-900">WA & Produk Manager</h1><p className="brand-subtitle text-xs text-slate-500">Digital product expiry tracker</p></div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
