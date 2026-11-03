@@ -26,8 +26,8 @@ const presets:Reply[]=[
 ];
 const tabs=[["dashboard","Dashboard",LayoutDashboard],["invoice","Invoice & Kuitansi",FileText],["crm","CRM Pelanggan",Users],["reply","Quick Reply",MessageSquareText],["catalog","Katalog Produk",Store],["schedule","Jadwal Konten",CalendarClock]] as const;
 
-export function BusinessSuite({userId,products,notify}:{userId:string;products:Product[];notify:(s:string)=>void}){
- const [tab,setTab]=useState<string>("invoice");
+export function BusinessSuite({userId,products,notify,dashboardContent}:{userId:string;products:Product[];notify:(s:string)=>void;dashboardContent?:React.ReactNode}){
+ const [tab,setTab]=useState<string>("dashboard");
  const [contacts,setContacts]=useState<Contact[]>([]),[catalog,setCatalog]=useState<Catalog[]>([]),[replies,setReplies]=useState<Reply[]>(presets),[schedules,setSchedules]=useState<Schedule[]>([]);
  const [tagFilter,setTagFilter]=useState("Semua"),[replyQuery,setReplyQuery]=useState(""),[targetPhone,setTargetPhone]=useState("");
  const [invoice,setInvoice]=useState({buyer:"",phone:"",product:"",duration:"1 Bulan",method:"QRIS",status:"Menunggu Pembayaran",date:today(),subtotal:0,admin:0});
