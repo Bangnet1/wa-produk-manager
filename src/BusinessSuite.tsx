@@ -24,7 +24,7 @@ const presets:Reply[]=[
 {id:"p4",title:"Format Pemesanan & Price List Produk",body:"🛍️ FORMAT PEMESANAN BANGNET\nNama:\nProduk/Varian:\nDurasi:\nMetode pembayaran:\n\nSilakan chat admin untuk price list terbaru dan ketersediaan."},
 {id:"p5",title:"Konfirmasi Pembayaran Diterima",body:"✅ Pembayaran Anda sudah kami terima. Terima kasih telah berbelanja di Bangnet! Pesanan sedang kami proses dan detail akses akan dikirim melalui WhatsApp ini."}
 ];
-const tabs=[["dashboard","Dashboard",LayoutDashboard],["invoice","Invoice & Kuitansi",FileText],["crm","CRM & Konten",CalendarClock],["reply","Quick Reply",MessageSquareText],["catalog","Katalog Produk",Store]] as const;
+const tabs=[["dashboard","Dashboard",LayoutDashboard],["invoice","Invoice & Kuitansi",FileText],["crm","CRM & Konten",CalendarClock],["reply","Quick Reply",MessageSquareText],] as const;
 
 export function BusinessSuite({userId,products,notify,dashboardContent}:{userId:string;products:Product[];notify:(s:string)=>void;dashboardContent?:React.ReactNode}){
  const [tab,setTab]=useState<string>("dashboard");
