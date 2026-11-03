@@ -236,7 +236,7 @@ export default function App() {
     if(!user){notify("Sesi login tidak ditemukan. Silakan login kembali.");return false;}
     const row={...template,id:crypto.randomUUID(),category:"Streaming",stock:"Tersedia",user_id:user.id};
     const {data,error}=await supabase.from("product_catalog").upsert(row,{onConflict:"id"}).select("id,name,description,cost,sale,stock").single();
-    if(error){notify("Template gagal disimpan: "+error.message);return false;}
+    if(error){notify("Template gagal disimpan. "+error.message+(error.details?" Detail: "+error.details:"")+(error.hint?" Petunjuk: "+error.hint:""));return false;}
     setCatalogOptions(prev=>[...prev.filter(x=>x.id!==data.id),data as {id:string;name:string;description:string;cost:number;sale:number;stock:string}]);
     notify("Template produk berhasil disimpan.");
     return true;
@@ -486,5 +486,5 @@ function ProductModal({form,catalogOptions,onAddTemplate,onDeleteTemplate,editin
 }
 
 function Toast({message,onClose}:{message:string;onClose:()=>void}) {
-  return <div className="fixed bottom-5 right-5 z-[60] flex max-w-sm items-start gap-3 rounded-2xl bg-slate-900 px-4 py-3.5 text-sm text-white shadow-2xl"><Check size={18} className="mt-0.5 shrink-0 text-emerald-400"/><span>{message}</span><button onClick={onClose} className="ml-2 text-slate-400"><X size={16}/></button></div>;
+  return <div className="fixed bottom-24 left-3 right-3 z-[60] flex max-w-xl items-start gap-3 rounded-2xl bg-slate-900 px-4 py-3.5 text-sm text-white shadow-2xl sm:left-auto sm:right-5"><Check size={18} className="mt-0.5 shrink-0 text-emerald-400"/><span className="min-w-0 flex-1 whitespace-normal break-words">{message}</span><button onClick={onClose} className="ml-2 shrink-0 text-slate-400"><X size={16}/></button></div>;
 }
