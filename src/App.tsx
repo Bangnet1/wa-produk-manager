@@ -7,6 +7,7 @@ import {
   ShieldCheck, Trash2, X, Package, Wallet, CalendarDays
 } from "lucide-react";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../js/config.js";
+import { BusinessSuite } from "./BusinessSuite";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -318,6 +319,7 @@ export default function App() {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <BusinessSuite userId={user.id} products={products} notify={notify} />
         <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div><p className="text-xs font-bold uppercase tracking-[.2em] text-teal-700">Dashboard</p><h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Manajemen Produk Digital</h2><p className="mt-1 text-sm text-slate-500">Pantau langganan pelanggan dan tindak lanjuti sebelum masa aktif berakhir.</p></div>
           <div className="flex flex-wrap gap-2"><button onClick={openBatch} className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800 hover:bg-emerald-100"><MessageCircle size={17}/> Pengingat Masal ({batchTargets.length})</button><button onClick={openCreate} className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-teal-700/15 hover:bg-teal-800"><Plus size={17}/> Tambah Produk</button></div>
