@@ -71,6 +71,7 @@ export default function App() {
   const [password, setPassword] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
+  const [catalogOptions, setCatalogOptions] = useState<{name:string;description:string;cost:number;sale:number;stock:string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterKey>("ALL");
@@ -157,8 +158,14 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (user) loadProducts();
-    else { setProducts([]); setLoading(false); }
+    if (user) {
+      loadProducts();
+      supabase.from("product_catalog").select("name,description,cost,sale,stock").order("name")
+        .then(({data,error}) => {
+          if (error) { console.error("Gagal memuat katalog produk:", error.message); return; }
+          setCatalogOptions((data ?? []) as {name:string;description:string;cost:number;sale:number;stock:string}[]);
+        });
+    } else { setProducts([]); setCatalogOptions([]); setLoading(false); }
   }, [user, loadProducts]);
 
   const reminders = useMemo(() => products.filter(p => {
@@ -429,7 +436,7 @@ function ProductModal({form,editing,saving,onChange,onClose,onSubmit}:{form:Prod
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="text-sm font-semibold text-slate-700">Nama pelanggan<input required value={form.customer_name} onChange={e => onChange("customer_name",e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 px-3.5 py-3 font-normal outline-none focus:border-teal-500" placeholder="Nama pelanggan"/></label>
         <label className="text-sm font-semibold text-slate-700">Nomor WhatsApp<input required value={form.phone} onChange={e => onChange("phone",e.target.value)} onBlur={() => onChange("phone",normalizePhone(form.phone))} className="mt-2 w-full rounded-xl border border-slate-200 px-3.5 py-3 font-normal outline-none focus:border-teal-500" placeholder="6281234567890"/><span className="mt-1 block text-[11px] font-normal text-slate-400">Gunakan kode negara 62.</span></label>
-        <label className="text-sm font-semibold text-slate-700">Produk digital<select value={form.product_name} onChange={e => onChange("product_name",e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 font-normal outline-none focus:border-teal-500">{PRESETS.map(x => <option key={x}>{x}</option>)}</select></label>
+        <label className="text-sm font-semibold text-slate-700">Produk digital<select value={form.product_name} onChange={e => { const name=e.target.value; const item=catalogOptions.find(x=>x.name===name); onChange("product_name",name); if(item){onChange("variant",item.description||"");onChange("purchase_price",item.cost??null);onChange("selling_price",item.sale??null);} }} className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 font-normal outline-none focus:border-teal-500"><option value="">Pilih produk dari katalog</option>{catalogOptions.filter(x=>x.stock!=="Habis").map((x,i)=><option key={`${x.name}-${i}`} value={x.name}>{x.name}</option>)}{!catalogOptions.some(x=>x.name===form.product_name)&&form.product_name&&<option value={form.product_name}>{form.product_name}</option>}{catalogOptions.length===0&&PRESETS.map(x=><option key={x} value={x}>{x}</option>)}</select>{catalogOptions.length===0&&<span className="mt-1 block text-xs font-normal text-amber-600">Katalog belum berisi produk tersedia. Tambahkan produk melalui Katalog & Etalase Produk Mini.</span>}</label>
         <label className="text-sm font-semibold text-slate-700">Varian / durasi<input required value={form.variant ?? ""} onChange={e => onChange("variant",e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 px-3.5 py-3 font-normal outline-none focus:border-teal-500" placeholder="Private 1 bulan / Sharing"/></label>
         <label className="text-sm font-semibold text-slate-700">Tanggal mulai<input required type="date" value={form.purchase_date} onChange={e => onChange("purchase_date",e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 px-3.5 py-3 font-normal outline-none focus:border-teal-500"/></label>
         <label className="text-sm font-semibold text-slate-700">Durasi (hari)<input required min="1" type="number" value={form.duration_days} onChange={e => onChange("duration_days",Number(e.target.value))} className="mt-2 w-full rounded-xl border border-slate-200 px-3.5 py-3 font-normal outline-none focus:border-teal-500"/></label>
