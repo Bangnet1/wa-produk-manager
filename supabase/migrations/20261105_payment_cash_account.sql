@@ -10,7 +10,7 @@ alter table public.payments
   add constraint payments_cash_account_owner_fk
   foreign key (user_id, cash_account_id)
   references public.cash_accounts(user_id, id)
-  on delete set null (cash_account_id);
+  on delete restrict;
 
 create index if not exists idx_payments_cash_account
   on public.payments(user_id, cash_account_id, paid_at desc)
