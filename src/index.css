@@ -14,3 +14,41 @@ button, input, select { font: inherit; }
 .chip,.chip-on{border-radius:999px;padding:.45rem .8rem;font-size:.75rem;font-weight:700}
 .chip{background:#f1f5f9;color:#475569}.chip-on{background:#0f766e;color:white}
 .tablehead{padding:.7rem .8rem;text-align:left;background:#f8fafc;color:#64748b;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}
+
+
+/* Mobile-first usability improvements */
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-x: hidden; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button, .action { touch-action: manipulation; }
+.field { min-height: 44px; }
+@media (max-width: 640px) {
+  body { font-size: 14px; }
+  .business-suite { border-radius: 18px; margin-bottom: 18px; }
+  .business-tabs { position: sticky; top: 64px; z-index: 20; background: rgba(255,255,255,.97); backdrop-filter: blur(12px); padding: 9px 10px; }
+  .business-tabs > div { scrollbar-width: none; scroll-snap-type: x proximity; }
+  .business-tabs > div::-webkit-scrollbar { display: none; }
+  .business-tabs button { min-height: 42px; padding: 10px 12px; scroll-snap-align: start; }
+  .business-content { padding: 14px 12px !important; }
+  .business-content .field { font-size: 16px; min-height: 46px; padding: 11px 12px; }
+  .business-content .action { min-height: 44px; padding: 10px 12px; font-size: 12px; }
+  .business-content .grid { min-width: 0; }
+  .business-content input[type="file"] { max-width: 100%; font-size: 13px; }
+  .business-content table { font-size: 12px; }
+  .business-content .overflow-x-auto { -webkit-overflow-scrolling: touch; }
+  #invoice-preview { padding: 12px !important; }
+  #invoice-preview > div { padding: 14px !important; }
+  #invoice-preview img { width: min(48vw, 176px); height: min(48vw, 176px); }
+  .business-content .recharts-responsive-container { min-width: 0; }
+  .business-content h3 { font-size: 17px; line-height: 1.35; }
+  .business-content label { line-height: 1.5; }
+  .business-content .flex.flex-wrap { gap: 7px; }
+}
+@media (max-width: 640px) {
+  .app-shell header > div { padding: 9px 12px; }
+  .app-shell header .brand-subtitle { display: none; }
+  .app-main { padding: 16px 12px 28px !important; }
+  .dashboard-actions { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .dashboard-actions button { min-height: 46px; padding: 10px 8px; font-size: 12px; }
+  .dashboard-title { font-size: 22px !important; }
+}
