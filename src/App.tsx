@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { createClient, type User } from "@supabase/supabase-js";
 import {
-  Activity, Bell, CalendarClock, Check, ChevronDown, CircleAlert, Clock3,
+  Activity, Bell, CalendarClock, Check, ChevronDown, ChevronUp, CircleAlert, Clock3,
   LayoutDashboard, LogOut, MessageCircle, Pencil, Plus, RefreshCw, Search,
   ShieldCheck, Trash2, X, Package, Wallet, CalendarDays, Moon, Sun
 } from "lucide-react";
@@ -445,10 +445,10 @@ function Metric({icon,label,value,note,tone}:{icon:ReactNode;label:string;value:
 }
 
 function ProductTemplateManager({options,onAdd,onDelete,onSelect}:{options:{id:string;name:string;description:string;cost:number;sale:number;stock:string}[];onAdd:(t:{id?:string;name:string;description:string;cost:number;sale:number})=>Promise<boolean>;onDelete:(id:string)=>Promise<void>;onSelect:(item:{name:string;description:string;cost:number;sale:number})=>void}) {
- const [name,setName]=useState(""); const [description,setDescription]=useState("1 Bulan"); const [cost,setCost]=useState(""); const [sale,setSale]=useState(""); const [busy,setBusy]=useState(false); const [editingId,setEditingId]=useState<string|null>(null);
+ const [name,setName]=useState(""); const [description,setDescription]=useState("1 Bulan"); const [cost,setCost]=useState(""); const [sale,setSale]=useState(""); const [busy,setBusy]=useState(false); const [editingId,setEditingId]=useState<string|null>(null); const [listExpanded,setListExpanded]=useState(true);
  const submit=async()=>{if(!name.trim())return;setBusy(true);const saved=await onAdd({id:editingId||undefined,name:name.trim(),description:description.trim(),cost:Number(cost)||0,sale:Number(sale)||0});if(saved){setEditingId(null);setName("");setDescription("1 Bulan");setCost("");setSale("");}setBusy(false);};
  return <div className="sm:col-span-2 rounded-2xl border border-slate-600 bg-slate-800 p-4">
-  <h4 className="font-bold text-slate-100">Template produk digital</h4><p className="mb-3 text-xs text-slate-300">Buat daftar sendiri. Pilih template untuk mengisi varian, modal, dan harga jual otomatis.</p>
+  <div className="mb-3 flex items-start justify-between gap-3"><div className="min-w-0"><h4 className="font-bold text-slate-100">Template produk digital</h4><p className="text-xs text-slate-300">Buat daftar sendiri. Pilih template untuk mengisi varian, modal, dan harga jual otomatis.</p></div><button type="button" onClick={()=>setListExpanded(v=>!v)} aria-expanded={listExpanded} className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-500 px-3 py-2 text-xs font-semibold text-slate-100 hover:bg-slate-700">{listExpanded?"Sembunyikan":"Tampilkan"}{listExpanded?<ChevronUp size={15}/>:<ChevronDown size={15}/>}</button></div>
   <div className="grid grid-cols-2 gap-2">
    <input className="rounded-xl border border-slate-600 bg-slate-900 text-slate-100 px-3 py-2 text-sm" placeholder="Nama produk" value={name} onChange={e=>setName(e.target.value)}/>
    <input className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="Varian / durasi" value={description} onChange={e=>setDescription(e.target.value)}/>
@@ -456,10 +456,10 @@ function ProductTemplateManager({options,onAdd,onDelete,onSelect}:{options:{id:s
    <input className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm" inputMode="numeric" placeholder="Harga jual" value={sale} onChange={e=>setSale(e.target.value.replace(/\D/g,""))}/>
   </div>
   <div className="mt-3 flex gap-2"><button type="button" disabled={busy||!name.trim()} onClick={submit} className="action"><Plus size={14}/>{editingId?"Simpan perubahan":"Simpan template"}</button>{editingId&&<button type="button" className="action" onClick={()=>{setEditingId(null);setName("");setDescription("1 Bulan");setCost("");setSale("");}}>Batal edit</button>}</div>
-  <div className="mt-3 space-y-2">{options.map(item=><div key={item.id} className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white p-3">
+  {listExpanded&&<div className="mt-3 space-y-2">{options.length===0?<p className="rounded-xl border border-dashed border-slate-500 p-3 text-xs text-slate-300">Belum ada template tersimpan.</p>:options.map(item=><div key={item.id} className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white p-3">
    <button type="button" className="min-w-0 flex-1 text-left" onClick={()=>onSelect(item)}><span className="block truncate text-sm font-semibold">{item.name}</span><span className="block text-xs text-slate-300">{item.description} · Modal {money(item.cost)} · Jual {money(item.sale)}</span></button>
    <div className="flex shrink-0 gap-1"><button type="button" aria-label={`Edit template ${item.name}`} className="rounded-lg p-2 text-teal-700 hover:bg-teal-50" onClick={()=>{setEditingId(item.id);setName(item.name);setDescription(item.description);setCost(String(item.cost));setSale(String(item.sale));}}><Pencil size={16}/></button><button type="button" aria-label={`Hapus template ${item.name}`} className="rounded-lg p-2 text-rose-600 hover:bg-rose-50" onClick={()=>onDelete(item.id)}><Trash2 size={16}/></button></div>
-  </div>)}</div>
+  </div>)}</div>}
  </div>;
 }
 
