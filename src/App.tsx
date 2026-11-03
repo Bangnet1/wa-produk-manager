@@ -322,8 +322,7 @@ export default function App() {
       </header>
 
       <main className="app-main mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <BusinessSuite userId={user.id} products={products} notify={notify} />
-        <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <BusinessSuite userId={user.id} products={products} notify={notify} dashboardContent={<>        <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div><p className="text-xs font-bold uppercase tracking-[.2em] text-teal-700">Dashboard</p><h2 className="dashboard-title mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Manajemen Produk Digital</h2><p className="mt-1 text-sm text-slate-500">Pantau langganan pelanggan dan tindak lanjuti sebelum masa aktif berakhir.</p></div>
           <div className="dashboard-actions flex flex-wrap gap-2"><button onClick={openBatch} className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800 hover:bg-emerald-100"><MessageCircle size={17}/> Pengingat Masal ({batchTargets.length})</button><button onClick={openCreate} className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-teal-700/15 hover:bg-teal-800"><Plus size={17}/> Tambah Produk</button></div>
         </div>
@@ -375,6 +374,7 @@ export default function App() {
           <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3 text-xs text-slate-400"><span>Menampilkan {visibleProducts.length} dari {products.length} produk</span><button onClick={loadProducts} className="inline-flex items-center gap-1.5 font-semibold text-teal-700 hover:text-teal-900"><RefreshCw size={13}/> Muat ulang</button></div>
         </section>
         <p className="mt-4 text-center text-xs text-slate-400">Data tersimpan di Supabase dan dilindungi Row Level Security.</p>
+        </>} />
       </main>
       {modalOpen && <ProductModal form={form} editing={!!editing} saving={saving} onChange={updateForm} onClose={() => setModalOpen(false)} onSubmit={saveProduct}/>}
       {batchOpen && <BatchReminderModal targets={batchTargets} selected={batchSelected} toggle={toggleBatchSelection} setSelected={setBatchSelected} template={batchTemplate} setTemplate={setBatchTemplate} templates={templates} preview={batchPreview} previewProduct={previewProduct} account={paymentAccount} setAccount={setPaymentAccount} delay={batchDelay} setDelay={setBatchDelay} running={batchRunning} progress={batchProgress} logs={batchLogs} tab={batchTab} setTab={setBatchTab} onHistory={loadBatchHistory} onExecute={executeBatch} onClose={()=>setBatchOpen(false)}/>} 
