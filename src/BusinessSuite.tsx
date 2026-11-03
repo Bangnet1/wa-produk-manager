@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../js/config.js";
 import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { LayoutDashboard, FileText, Users, MessageSquareText, CalendarClock, Plus, Copy, Printer, MessageCircle, Search, Trash2, Pencil, X, Download, ImagePlus } from "lucide-react";
+import { LayoutDashboard, FileText, Users, MessageSquareText, CalendarClock, Plus, Copy, Printer, MessageCircle, Search, Trash2, Pencil, X, Download, ImagePlus, Wallet } from "lucide-react";
 import { Transactions } from "./Transactions";
 import { Finance } from "./Finance";
 
