@@ -7,6 +7,7 @@ import {
   ShieldCheck, Trash2, X, Package, Wallet, CalendarDays, Moon, Sun
 } from "lucide-react";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../js/config.js";
+import bangnetLogo from "./logo";
 import { BusinessSuite } from "./BusinessSuite";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
