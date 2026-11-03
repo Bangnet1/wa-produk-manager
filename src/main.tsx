@@ -13,7 +13,7 @@ class AppErrorBoundary extends React.Component<React.PropsWithChildren, Boundary
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error("WA & Produk Manager render error:", error, info.componentStack);
+    console.error("Bangnet Manager render error:", error, info.componentStack);
   }
 
   render() {
@@ -39,6 +39,6 @@ if (root) {
     );
   } catch (error) {
     root.innerHTML = '<main style="font-family:Arial,sans-serif;padding:24px;color:#991b1b"><h1>Aplikasi gagal dimulai</h1><p>Silakan muat ulang halaman dan kirimkan pesan kesalahan dari konsol browser.</p></main>';
-    console.error("WA & Produk Manager startup error:", error);
+    console.error("Bangnet Manager startup error:", error);
   }
 }
