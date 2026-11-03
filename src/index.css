@@ -25,10 +25,11 @@ button, .action { touch-action: manipulation; }
 @media (max-width: 640px) {
   body { font-size: 14px; }
   .business-suite { border-radius: 18px; margin-bottom: 18px; }
-  body { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }\n  .business-tabs { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 1000; width: 100%; background: rgba(255,255,255,.98); backdrop-filter: blur(14px); padding: 9px 10px calc(9px + env(safe-area-inset-bottom)); border-top: 1px solid #e2e8f0; box-shadow: 0 -8px 24px rgba(15,23,42,.10); }
-  .business-tabs > div { scrollbar-width: none; scroll-snap-type: x proximity; }
-  .business-tabs > div::-webkit-scrollbar { display: none; }
-  .business-tabs button { min-height: 42px; padding: 10px 12px; scroll-snap-align: start; }
+  body { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }\n  .business-tabs { position: fixed; left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); top: auto; z-index: 1000; width: auto; max-width: 560px; margin: 0 auto; padding: 8px 10px; border: 1px solid rgba(226,232,240,.95); border-radius: 24px; background: rgba(255,255,255,.96); backdrop-filter: blur(18px); box-shadow: 0 8px 28px rgba(15,23,42,.18); }
+  .business-tabs-inner { display: flex; align-items: center; justify-content: space-around; gap: 4px; }
+  .business-tab-button { position: relative; display: flex; flex: 1 1 0; align-items: center; justify-content: center; min-width: 0; min-height: 48px; padding: 10px 4px; border: 0; border-radius: 16px; background: transparent; color: #64748b; transition: color .18s ease, background .18s ease, transform .18s ease; }
+  .business-tab-button.is-active { color: #0f766e; background: #ccfbf1; transform: translateY(-2px); }
+  .business-tab-button.is-active::before { content: ""; position: absolute; top: -8px; left: 50%; width: 22px; height: 3px; border-radius: 999px; background: #0f766e; transform: translateX(-50%); }
   .business-content { padding: 14px 12px 92px !important; }
   .business-content .field { font-size: 16px; min-height: 46px; padding: 11px 12px; }
   .business-content .action { min-height: 44px; padding: 10px 12px; font-size: 12px; }
