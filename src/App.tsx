@@ -4,7 +4,7 @@ import { createClient, type User } from "@supabase/supabase-js";
 import {
   Activity, Bell, CalendarClock, Check, ChevronDown, CircleAlert, Clock3,
   LayoutDashboard, LogOut, MessageCircle, Pencil, Plus, RefreshCw, Search,
-  ShieldCheck, Trash2, X, Package, Wallet, CalendarDays
+  ShieldCheck, Trash2, X, Package, Wallet, CalendarDays, Moon, Sun
 } from "lucide-react";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../js/config.js";
 import { BusinessSuite } from "./BusinessSuite";
@@ -63,6 +63,8 @@ function StatusBadge({ status }: { status: ProductStatus }) {
 }
 
 export default function App() {
+  const [darkMode, setDarkMode] = useState(() => { try { return localStorage.getItem("bangnet-dark-mode") === "1"; } catch { return false; } });
+  useEffect(() => { try { localStorage.setItem("bangnet-dark-mode", darkMode ? "1" : "0"); } catch {} }, [darkMode]);
   const [user, setUser] = useState<User | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -295,7 +297,7 @@ export default function App() {
   );
 
   return (
-    <div className="app-shell min-h-screen bg-slate-50 text-slate-800">
+    <div className={`app-shell min-h-screen bg-slate-50 text-slate-800 ${darkMode ? "dark-mode" : ""}`}>
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
@@ -303,6 +305,7 @@ export default function App() {
             <div><h1 className="font-bold text-slate-900">WA & Produk Manager</h1><p className="brand-subtitle text-xs text-slate-500">Digital product expiry tracker</p></div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
+            <button type="button" onClick={() => setDarkMode(v => !v)} className="rounded-xl border border-slate-200 p-2.5 text-slate-600 hover:bg-slate-50" aria-label={darkMode ? "Aktifkan mode terang" : "Aktifkan mode gelap"} title={darkMode ? "Mode terang" : "Mode gelap"}>{darkMode ? <Sun size={19}/> : <Moon size={19}/>}</button>
             <div className="relative">
               <button onClick={() => { setBellOpen(v => !v); setAlertDismissed(true); }} className="relative rounded-xl border border-slate-200 p-2.5 text-slate-600 hover:bg-slate-50" aria-label="Notifikasi">
                 <Bell size={19}/>{reminders.length > 0 && <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">{reminders.length}</span>}
