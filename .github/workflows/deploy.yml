@@ -1,7 +1,7 @@
 name: Deploy React app to GitHub Pages
 on:
   push:
-    branches: [main, feature/react-expiry-tracker]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
