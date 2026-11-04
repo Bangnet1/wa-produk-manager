@@ -82,3 +82,90 @@ button, .action { touch-action: manipulation; }
 .app-shell.dark-mode .business-tabs { background: rgba(17,28,45,.96) !important; box-shadow: 0 8px 28px rgba(0,0,0,.45); }
 .app-shell.dark-mode table thead { background: #1b293d !important; }
 .app-shell.dark-mode tr:hover { background: #1b293d !important; }
+
+
+/* Desktop navigation: readable labels and comfortable hit targets */
+@media (min-width: 641px) {
+  .business-tabs {
+    display: flex;
+    justify-content: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 24px 24px 0 0;
+  }
+  .business-tabs-inner {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+  }
+  .business-tab-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 54px;
+    min-width: 150px;
+    padding: 12px 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #fff;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 700;
+    transition: background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease;
+  }
+  .business-tab-button:hover {
+    border-color: #99f6e4;
+    background: #f0fdfa;
+    color: #0f766e;
+  }
+  .business-tab-button.is-active {
+    border-color: #0f766e;
+    background: #0f766e;
+    color: #fff;
+    box-shadow: 0 5px 14px rgba(15,118,110,.16);
+  }
+  .business-tab-label { display: inline; white-space: nowrap; }
+  .app-brand-logo {
+    display: block;
+    width: 54px;
+    height: 44px;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 10px;
+    flex: 0 0 54px;
+  }
+  .app-brand-logo img {
+    display: block;
+    width: 54px;
+    height: 54px;
+    object-fit: contain;
+    object-position: center top;
+    background: #fff;
+    transform: translateY(-1px);
+  }
+}
+@media (max-width: 640px) {
+  .business-tab-label { display: none; }
+  .app-brand-logo {
+    display: block;
+    width: 44px;
+    height: 40px;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 9px;
+    flex: 0 0 44px;
+  }
+  .app-brand-logo img {
+    display: block;
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    object-position: center top;
+    background: #fff;
+  }
+}
