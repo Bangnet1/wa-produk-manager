@@ -80,7 +80,7 @@ export function BusinessSuite({userId,products,notify,dashboardContent}:{userId:
  const updateTags=async()=>{if(!contactEdit)return;const validId=/^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(contactEdit.id);await saveRow("crm_contacts",{...contactEdit,id:validId?contactEdit.id:crypto.randomUUID()});setContactEdit(null);};
  const categories=["Streaming","Desain","Musik","VPN","Cloud"];
  return <section className="business-suite mb-8 rounded-3xl border border-slate-200 bg-white shadow-sm">
-  <nav className="business-tabs" aria-label="Navigasi utama"><div className="business-tabs-inner">{tabs.map(([id,label,Icon])=><button key={id} type="button" title={label} aria-label={label} aria-current={tab===id?"page":undefined} onClick={()=>setTab(id)} className={`business-tab-button ${tab===id?"is-active":""}`}><Icon size={21} strokeWidth={tab===id?2.5:2}/><span className="sr-only">{label}</span></button>)}</div></nav>
+  <nav className="business-tabs" aria-label="Navigasi utama"><div className="business-tabs-inner">{tabs.map(([id,label,Icon])=><button key={id} type="button" title={label} aria-label={label} aria-current={tab===id?"page":undefined} onClick={()=>setTab(id)} className={`business-tab-button ${tab===id?"is-active":""}`}><Icon size={21} strokeWidth={tab===id?2.5:2}/><span className="business-tab-label">{label}</span></button>)}</div></nav>
   <div className="business-content p-3 sm:p-6">
   {tab==="transactions"&&<Transactions userId={userId} notify={notify}/>}
   {tab==="finance"&&<Finance userId={userId} notify={notify}/>}
