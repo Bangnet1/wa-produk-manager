@@ -324,7 +324,7 @@ export default function App() {
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <img src={bangnetLogo} alt="Bangnet" className="h-12 w-12 rounded-xl object-contain bg-white"/>
+            <span className="app-brand-logo"><img src={bangnetLogo} alt="Bangnet"/></span>
             <div><h1 className="font-bold text-slate-900">Bangnet Manager</h1><p className="brand-subtitle text-xs text-slate-500">All-in-One Digital Business Workspace</p></div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
