@@ -236,9 +236,13 @@ export default function App() {
     });
     if (newlyDue.length) {
       setAlertDismissed(false);
-      notify(newlyDue.length === 1
+      const message = newlyDue.length === 1
         ? `${newlyDue[0].customer_name}: ${newlyDue[0].product_name} jatuh tempo ${dayDiff(newlyDue[0].expiry_date) === 0 ? "hari ini" : "dalam " + dayDiff(newlyDue[0].expiry_date) + " hari"}.`
-        : `Ada ${newlyDue.length} produk yang jatuh tempo dalam 3 hari.`);
+        : `Ada ${newlyDue.length} produk yang jatuh tempo dalam 3 hari.`;
+      notify(message);
+      if ("Notification" in window && Notification.permission === "granted") {
+        try { new Notification("Pengingat Bangnet Manager", { body: message, icon: `${import.meta.env.BASE_URL}icons/icon-192.svg`, tag: `expiry-${today}` }); } catch (error) { console.warn("Notifikasi browser tidak dapat ditampilkan:", error); }
+      }
     }
   }, [products, notify]);
 
@@ -410,17 +414,17 @@ export default function App() {
                 <Bell size={19}/>{reminders.length > 0 && <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">{reminders.length}</span>}
               </button>
               {bellOpen && <div className="absolute right-0 mt-3 w-80 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
-                <div className="flex items-center justify-between px-1 pb-2"><b className="text-sm">Pengingat masa aktif</b><button onClick={() => setBellOpen(false)}><X size={16}/></button></div>
+                <div className="flex items-center justify-between px-1 pb-2"><b className="text-sm">Pengingat masa aktif</b><button onClick={() => setBellOpen(false)}><X size={16}/></button></div><button type="button" onClick={async()=>{if(!("Notification" in window)){notify("Browser ini belum mendukung notifikasi.");return;}const permission=await Notification.requestPermission();setNotificationPermission(permission);notify(permission==="granted"?"Notifikasi pengingat berhasil diaktifkan.":"Izin notifikasi belum diberikan.");}} className="mb-2 w-full rounded-xl border border-teal-200 bg-teal-50 px-3 py-2 text-left text-xs font-semibold text-teal-800">{notificationPermission==="granted"?"✓ Notifikasi browser aktif":"Aktifkan notifikasi pengingat"}</button>
                 {reminders.length === 0 ? <p className="p-4 text-center text-sm text-slate-500">Tidak ada produk yang jatuh tempo dalam 3 hari.</p> : reminders.map(p => <div key={p.id} className="border-t border-slate-100 py-3"><div className="flex justify-between gap-2 text-sm font-semibold"><span>{p.product_name}</span><span className="text-amber-700">H-{dayDiff(p.expiry_date)}</span></div><p className="mt-1 text-xs text-slate-500">{p.customer_name} · {formatDate(p.expiry_date)}</p><a href={waUrl(p)} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700"><MessageCircle size={13}/> Hubungi pelanggan</a></div>)}
               </div>}
             </div>
-            <div className="hidden max-w-48 text-right sm:block"><p className="truncate text-xs font-semibold text-slate-700">{user.email}</p><p className="text-[11px] text-slate-400">Akun aktif</p></div>
+            <div className="hidden max-w-48 text-right sm:block"><p className="truncate text-xs font-semibold text-slate-700">{user.email}</p><p className="text-[11px] text-slate-400">Akun aktif</p></div><div className="hidden sm:flex flex-col items-end text-[10px] font-semibold"><span className={isOnline?"text-emerald-700":"text-amber-700"}>{isOnline?"Online":"Offline"}</span>{pendingSync>0&&<span className="text-amber-700">{pendingSync} perubahan menunggu sinkronisasi</span>}</div>
             <button onClick={signOut} className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"><LogOut size={16}/><span className="hidden sm:inline">Keluar</span></button>
           </div>
         </div>
       </header>
 
-      <main className="app-main mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="app-main mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{(!isOnline||pendingSync>0)&&<div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"><b>{isOnline?"Menunggu sinkronisasi":"Mode offline"}</b><p className="mt-1 text-xs">{pendingSync>0?`${pendingSync} perubahan produk tersimpan di perangkat dan akan dikirim ke Supabase saat koneksi kembali.`:"Data yang tampil berasal dari snapshot terakhir di perangkat. Perubahan baru dapat dicatat sementara."}</p></div>}
         <BusinessSuite userId={user.id} products={products} notify={notify} dashboardContent={<>        <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div><p className="text-xs font-bold uppercase tracking-[.2em] text-teal-700">Dashboard</p><h2 className="dashboard-title mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Ringkasan Bisnis</h2><p className="mt-1 text-sm text-slate-500">Pantau operasional produk digital, pelanggan, transaksi, dan aktivitas bisnis dari satu tempat.</p></div>
           <div className="dashboard-actions flex flex-wrap gap-2"><button onClick={openBatch} className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800 hover:bg-emerald-100"><MessageCircle size={17}/> Pengingat Masal ({batchTargets.length})</button><button onClick={openCreate} className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-teal-700/15 hover:bg-teal-800"><Plus size={17}/> Tambah Produk</button></div>
