@@ -1,5 +1,5 @@
-const VERSION = "bangnet-shell-v2";
-const CORE = ["./", "./manifest.webmanifest", "./icons/icon-192.svg", "./icons/icon-512.svg"];
+const VERSION = "bangnet-shell-v3";
+const CORE = ["./", "./manifest.webmanifest", "./icons/bangnet-icon-192.jpg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(VERSION).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
 });
@@ -20,7 +20,7 @@ self.addEventListener("fetch", event => {
     return;
   }
   event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {
-    if (response.ok && (url.pathname.includes("/assets/") || /\.(css|js|svg|png|webp|woff2?)$/i.test(url.pathname))) {
+    if (response.ok && (url.pathname.includes("/assets/") || /\.(css|js|svg|png|jpe?g|webp|woff2?)$/i.test(url.pathname))) {
       const copy = response.clone();
       caches.open(VERSION).then(cache => cache.put(request, copy));
     }
