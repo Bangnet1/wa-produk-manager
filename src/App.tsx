@@ -248,7 +248,7 @@ export default function App() {
         : `Ada ${newlyDue.length} produk yang jatuh tempo dalam 3 hari.`;
       notify(message);
       if ("Notification" in window && Notification.permission === "granted") {
-        try { new Notification("Pengingat Bangnet Manager", { body: message, icon: `${import.meta.env.BASE_URL}icons/icon-192.svg`, tag: `expiry-${today}` }); } catch (error) { console.warn("Notifikasi browser tidak dapat ditampilkan:", error); }
+        try { new Notification("Pengingat Bangnet Manager", { body: message, icon: `${import.meta.env.BASE_URL}icons/bangnet-app-icon.svg`, tag: `expiry-${today}` }); } catch (error) { console.warn("Notifikasi browser tidak dapat ditampilkan:", error); }
       }
     }
   }, [products, notify]);

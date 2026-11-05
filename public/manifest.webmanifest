@@ -11,6 +11,7 @@
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "icons": [
-    { "src": "./icons/bangnet-icon-192.jpg", "sizes": "192x192", "type": "image/jpeg", "purpose": "any" }
+    { "src": "./icons/bangnet-app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icons/bangnet-app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
   ]
 }
