@@ -166,8 +166,8 @@ export default function App() {
     const items = await getProductMutations(user.id).catch(() => []);
     for (const item of items) {
       let result: { error: any };
-      if (item.kind === "insert") result = await supabase.from("products").insert(item.payload);
-      else if (item.kind === "update") result = await supabase.from("products").update(item.payload).eq("id", item.productId).eq("user_id", user.id);
+      if (item.kind === "insert") result = await supabase.from("products").insert(item.payload ?? {});
+      else if (item.kind === "update") result = await supabase.from("products").update(item.payload ?? {}).eq("id", item.productId).eq("user_id", user.id);
       else result = await supabase.from("products").delete().eq("id", item.productId).eq("user_id", user.id);
       if (result.error) {
         console.warn("Sinkronisasi offline tertunda:", result.error.message);
@@ -349,6 +349,7 @@ export default function App() {
   }
 
   async function deleteProduct(product: Product) {
+    if (!user) return;
     if (!window.confirm(`Hapus produk ${product.product_name} milik ${product.customer_name}?`)) return;
     if (!navigator.onLine) {
       await enqueueProductMutation({ userId: user.id, kind: "delete", productId: product.id });
@@ -364,6 +365,7 @@ export default function App() {
   }
 
   async function renewProduct(product: Product) {
+    if (!user) return;
     const newExpiry = addDays(product.expiry_date, 30);
     const changes = { expiry_date: newExpiry, duration_days: Number(product.duration_days || 0) + 30 };
     if (!navigator.onLine) {
