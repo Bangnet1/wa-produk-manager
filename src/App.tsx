@@ -9,6 +9,7 @@ import {
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../js/config.js";
 import bangnetLogo from "./logo";
 import { BusinessSuite } from "./BusinessSuite";
+import { countProductMutations, enqueueProductMutation, getProductMutations, getProductSnapshot, removeProductMutation, saveProductSnapshot } from "./offline";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -72,6 +73,9 @@ export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [catalogOptions, setCatalogOptions] = useState<{id:string;name:string;description:string;cost:number;sale:number;stock:string}[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isOnline, setIsOnline] = useState(() => navigator.onLine);
+  const [pendingSync, setPendingSync] = useState(0);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(() => "Notification" in window ? Notification.permission : "denied");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterKey>("ALL");
   const [modalOpen, setModalOpen] = useState(false);
@@ -145,10 +149,55 @@ export default function App() {
     if (!user) return;
     setLoading(true);
     const { data, error } = await supabase.from("products").select("*").order("expiry_date", { ascending: true });
-    if (error) notify("Gagal memuat produk: " + error.message);
-    else setProducts((data ?? []) as Product[]);
+    if (error) {
+      const cached = await getProductSnapshot<Product>(user.id).catch(() => null);
+      if (cached) setProducts(cached);
+      notify(cached ? "Mode offline: menampilkan data tersimpan di perangkat." : "Gagal memuat produk: " + error.message);
+    } else {
+      const rows = (data ?? []) as Product[];
+      setProducts(rows);
+      await saveProductSnapshot(user.id, rows).catch(error => console.warn("Gagal menyimpan snapshot offline:", error));
+    }
     setLoading(false);
   }, [user, notify]);
+
+  const syncPendingProducts = useCallback(async () => {
+    if (!user || !navigator.onLine) return;
+    const items = await getProductMutations(user.id).catch(() => []);
+    for (const item of items) {
+      let result: { error: any };
+      if (item.kind === "insert") result = await supabase.from("products").insert(item.payload);
+      else if (item.kind === "update") result = await supabase.from("products").update(item.payload).eq("id", item.productId).eq("user_id", user.id);
+      else result = await supabase.from("products").delete().eq("id", item.productId).eq("user_id", user.id);
+      if (result.error) {
+        console.warn("Sinkronisasi offline tertunda:", result.error.message);
+        break;
+      }
+      await removeProductMutation(item.id);
+    }
+    const remaining = await countProductMutations(user.id).catch(() => items.length);
+    setPendingSync(remaining);
+    if (items.length && remaining === 0) {
+      await loadProducts();
+      notify("Perubahan offline berhasil disinkronkan ke Supabase.");
+    }
+  }, [user, loadProducts, notify]);
+
+  useEffect(() => {
+    const update = () => setIsOnline(navigator.onLine);
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => { window.removeEventListener("online", update); window.removeEventListener("offline", update); };
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    countProductMutations(user.id).then(setPendingSync).catch(() => {});
+    if (navigator.onLine) syncPendingProducts();
+    const onOnline = () => syncPendingProducts();
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, [user, syncPendingProducts]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
@@ -272,6 +321,18 @@ export default function App() {
       duration_days: Number(form.duration_days), purchase_price: form.purchase_price === null ? null : Number(form.purchase_price),
       selling_price: form.selling_price === null ? null : Number(form.selling_price)
     };
+    if (!navigator.onLine) {
+      const productId = editing?.id || crypto.randomUUID();
+      const row = { ...payload, id: productId };
+      await enqueueProductMutation({ userId: user.id, kind: editing ? "update" : "insert", productId, payload: row });
+      const next = editing ? products.map(p => p.id === productId ? row as Product : p) : [row as Product, ...products];
+      setProducts(next);
+      await saveProductSnapshot(user.id, next);
+      setPendingSync(await countProductMutations(user.id));
+      setSaving(false); setModalOpen(false);
+      notify("Disimpan di perangkat. Perubahan akan disinkronkan saat internet kembali.");
+      return;
+    }
     const result = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id).select().single()
       : await supabase.from("products").insert(payload).select().single();
@@ -285,6 +346,14 @@ export default function App() {
 
   async function deleteProduct(product: Product) {
     if (!window.confirm(`Hapus produk ${product.product_name} milik ${product.customer_name}?`)) return;
+    if (!navigator.onLine) {
+      await enqueueProductMutation({ userId: user.id, kind: "delete", productId: product.id });
+      const next = products.filter(p => p.id !== product.id);
+      setProducts(next); await saveProductSnapshot(user.id, next);
+      setPendingSync(await countProductMutations(user.id));
+      notify("Penghapusan disimpan di perangkat dan menunggu sinkronisasi.");
+      return;
+    }
     const { error } = await supabase.from("products").delete().eq("id", product.id);
     if (error) notify("Gagal menghapus: " + error.message);
     else { notify("Produk berhasil dihapus."); await loadProducts(); }
@@ -292,9 +361,16 @@ export default function App() {
 
   async function renewProduct(product: Product) {
     const newExpiry = addDays(product.expiry_date, 30);
-    const { error } = await supabase.from("products").update({
-      expiry_date: newExpiry, duration_days: Number(product.duration_days || 0) + 30
-    }).eq("id", product.id);
+    const changes = { expiry_date: newExpiry, duration_days: Number(product.duration_days || 0) + 30 };
+    if (!navigator.onLine) {
+      await enqueueProductMutation({ userId: user.id, kind: "update", productId: product.id, payload: changes });
+      const next = products.map(p => p.id === product.id ? { ...p, ...changes } : p);
+      setProducts(next); await saveProductSnapshot(user.id, next);
+      setPendingSync(await countProductMutations(user.id));
+      notify("Perpanjangan disimpan di perangkat dan menunggu sinkronisasi.");
+      return;
+    }
+    const { error } = await supabase.from("products").update(changes).eq("id", product.id);
     if (error) notify("Gagal memperpanjang: " + error.message);
     else { notify(`Masa aktif ${product.product_name} diperpanjang sampai ${formatDate(newExpiry)}.`); await loadProducts(); }
   }
