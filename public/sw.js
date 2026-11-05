@@ -1,4 +1,4 @@
-const VERSION = "bangnet-shell-v1";
+const VERSION = "bangnet-shell-v2";
 const CORE = ["./", "./manifest.webmanifest", "./icons/icon-192.svg", "./icons/icon-512.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(VERSION).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
