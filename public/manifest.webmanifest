@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "Bangnet Manager",
+  "short_name": "Bangnet",
+  "description": "Workspace untuk mengelola produk digital, pelanggan, transaksi, dan keuangan.",
+  "lang": "id-ID",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f766e",
+  "icons": [
+    { "src": "./icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
