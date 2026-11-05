@@ -66,6 +66,12 @@ function StatusBadge({ status }: { status: ProductStatus }) {
 export default function App() {
   const [darkMode, setDarkMode] = useState(() => { try { return localStorage.getItem("bangnet-dark-mode") === "1"; } catch { return false; } });
   useEffect(() => { try { localStorage.setItem("bangnet-dark-mode", darkMode ? "1" : "0"); } catch {} }, [darkMode]);
+  useEffect(() => {
+    const capture = (event: Event) => { event.preventDefault(); setInstallPrompt(event); };
+    window.addEventListener("beforeinstallprompt", capture);
+    window.addEventListener("appinstalled", () => setInstallPrompt(null));
+    return () => window.removeEventListener("beforeinstallprompt", capture);
+  }, []);
   const [user, setUser] = useState<User | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -76,6 +82,7 @@ export default function App() {
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
   const [pendingSync, setPendingSync] = useState(0);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(() => "Notification" in window ? Notification.permission : "denied");
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterKey>("ALL");
   const [modalOpen, setModalOpen] = useState(false);
@@ -410,6 +417,7 @@ export default function App() {
             <div><h1 className="font-bold text-slate-900">Bangnet Manager</h1><p className="brand-subtitle text-xs text-slate-500">All-in-One Digital Business Workspace</p></div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
+            {installPrompt&&<button type="button" onClick={async()=>{await installPrompt.prompt();setInstallPrompt(null);}} className="inline-flex items-center gap-1 rounded-xl border border-teal-200 bg-teal-50 px-2.5 py-2 text-xs font-semibold text-teal-800"><Plus size={15}/><span className="hidden sm:inline">Instal aplikasi</span></button>}
             <button type="button" onClick={() => setDarkMode(v => !v)} className="rounded-xl border border-slate-200 p-2.5 text-slate-600 hover:bg-slate-50" aria-label={darkMode ? "Aktifkan mode terang" : "Aktifkan mode gelap"} title={darkMode ? "Mode terang" : "Mode gelap"}>{darkMode ? <Sun size={19}/> : <Moon size={19}/>}</button>
             <div className="relative">
               <button onClick={() => { setBellOpen(v => !v); setAlertDismissed(true); }} className="relative rounded-xl border border-slate-200 p-2.5 text-slate-600 hover:bg-slate-50" aria-label="Notifikasi">
